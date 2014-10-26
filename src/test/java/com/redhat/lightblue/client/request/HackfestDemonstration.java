@@ -2,10 +2,9 @@ package com.redhat.lightblue.client.request;
 
 import com.redhat.lightblue.client.LightblueClient;
 import com.redhat.lightblue.client.enums.NaryOperation;
-import com.redhat.lightblue.client.expression.ArrayExpression;
-import com.redhat.lightblue.client.expression.Expression;
-import com.redhat.lightblue.client.expression.NaryLogicalExpression;
-import com.redhat.lightblue.client.expression.ValueExpression;
+import com.redhat.lightblue.client.query.*;
+import com.redhat.lightblue.client.query.NaryLogicalQueryExpression;
+import com.redhat.lightblue.client.query.QueryExpression;
 import com.redhat.lightblue.client.projection.ArrayProjection;
 import com.redhat.lightblue.client.projection.FieldProjection;
 
@@ -21,23 +20,23 @@ public class HackfestDemonstration {
         LightblueClient client = new LightblueClient();
         DataFindRequest request = new DataFindRequest("terms","0.14.0-SNAPSHOT");
 
-        List<Expression> conditions = new ArrayList<>();
+        List<QueryExpression> conditions = new ArrayList<>();
 
-        conditions.add(new ValueExpression("termsTypeCode = NDA"));
-        conditions.add(new ValueExpression("statusCode = active"));
+        conditions.add(new ValueQueryExpression("termsTypeCode = NDA"));
+        conditions.add(new ValueQueryExpression("statusCode = active"));
 
         conditions.add(
-           new ArrayExpression("termsVerbiage",
-             new NaryLogicalExpression(
+           new ArrayQueryExpression("termsVerbiage",
+             new NaryLogicalQueryExpression(
                                 NaryOperation.AND,  // the next two lines are the array sig
-                                new ValueExpression("statusCode = active"),
-                                new ArrayExpression("termsVerbiageTranslation", new ValueExpression("statusCode = active")))));
-        request.where(new NaryLogicalExpression(NaryOperation.AND, conditions));
+                                new ValueQueryExpression("statusCode = active"),
+                                new ArrayQueryExpression("termsVerbiageTranslation", new ValueQueryExpression("statusCode = active")))));
+        request.where(new NaryLogicalQueryExpression(NaryOperation.AND, conditions));
 
         request.select(
                 new FieldProjection("_id", true, false),
-                new ArrayProjection("termsVerbiage", true, new ValueExpression("statusCode = active"),
-                        new ArrayProjection("termsVerbiageTranslation", true, new ValueExpression("statusCode = inactive"),
+                new ArrayProjection("termsVerbiage", true, new ValueQueryExpression("statusCode = active"),
+                        new ArrayProjection("termsVerbiageTranslation", true, new ValueQueryExpression("statusCode = inactive"),
                                 new FieldProjection("*", true, true)
                         )
                 )
